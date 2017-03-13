@@ -1,12 +1,20 @@
-Hello World commands entered in the following format: 
-"comand parametr1 parametr2"
+Commands entered in the following format:
 
-example : 
-ping destination 
-list 
-register login password 
+example :
+
+ping 
+echo 
+echo anyText 
 login login password 
+list 
 msg destination messegText 
-exit
+file destination fileName (file must be in home directory, fileName example "1.txt", received fileName "sourceLogin_fileName") 
+exit 
+receivemsg 
+receivefile
 
-to complete the program you must enter the command "stop"
+If you can not send a file, you can try to receive a file from another client and send it back with the appropriate name.
+
+list, receivemsg, receivefile updated automatically.
+
+Command "exit" closes the program.

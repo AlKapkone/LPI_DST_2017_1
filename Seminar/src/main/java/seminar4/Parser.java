@@ -1,7 +1,7 @@
-package sem3;
-
+package seminar4;
 public class Parser {
-	public String[] parsForComand(String line) {
+    
+    public String[] parsForComand(String line) {
         String[] outMas;
         String[] parsMas = line.split(" ", 2);
 
@@ -20,4 +20,5 @@ public class Parser {
         }
         return outMas;
     }
+    
 }

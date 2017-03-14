@@ -1,4 +1,4 @@
-package seminar5;
+package seminar6;
 
 public class Parser {
 

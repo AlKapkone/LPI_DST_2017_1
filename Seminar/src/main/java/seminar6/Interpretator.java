@@ -1,13 +1,14 @@
-package seminar5;
+package seminar6;
+
+import javax.jms.Session;
 
 
 public class Interpretator {
     private final CommandProcessing comP;
     private final Parser parser = new Parser(); 
     
-
-    public Interpretator(javax.ws.rs.client.Client client) {
-        comP = new CommandProcessing(client);        
+    public Interpretator(Session session, Session sessionReceiveMess, Session sessionReceiveFile) {
+        comP = new CommandProcessing(session, sessionReceiveMess, sessionReceiveFile);        
     }
     
     public void interpretator(String inLine){
@@ -41,14 +42,6 @@ public class Interpretator {
                     comP.file(comandMas);
                     break;
 
-                case "receivemsg":
-                    comP.receiveMsg();
-                    break;
-
-                case "receivefile":
-                    comP.receiveFile();
-                    break;
-
                 case "exit":
                     comP.exit();
                     break;
@@ -58,7 +51,7 @@ public class Interpretator {
                     break;
             }
         } catch (Exception ex) {
-            System.out.println("error");
+            System.out.println("Interpretator problem");
         }
     }
 }

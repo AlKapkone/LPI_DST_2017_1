@@ -1,18 +1,13 @@
-package seminar4;
+package seminar5;
 
-import java.io.IOException;
-import lpi.server.soap.ArgumentFault;
-import lpi.server.soap.IChatServer;
-import lpi.server.soap.LoginFault;
-import lpi.server.soap.ServerFault;
 
 public class Interpretator {
     private final CommandProcessing comP;
     private final Parser parser = new Parser(); 
     
 
-    public Interpretator(IChatServer ob) {
-        comP = new CommandProcessing(ob);        
+    public Interpretator(javax.ws.rs.client.Client client) {
+        comP = new CommandProcessing(client);        
     }
     
     public void interpretator(String inLine){
@@ -62,8 +57,8 @@ public class Interpretator {
                     System.out.println("No this comand");
                     break;
             }
-        } catch (ArgumentFault | ServerFault | LoginFault | IOException ex) {
-            System.out.println("Interpretator problem");
+        } catch (Exception ex) {
+            System.out.println("error");
         }
     }
 }

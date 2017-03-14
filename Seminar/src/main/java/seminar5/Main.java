@@ -1,4 +1,4 @@
-package seminar4;
+package seminar5;
 
 public class Main {
 
@@ -7,6 +7,5 @@ public class Main {
         Client client = new Client();
         client.start();
         
-    }
-    
+    }    
 }

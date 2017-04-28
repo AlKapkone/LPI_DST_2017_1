@@ -3,23 +3,19 @@ package seminar5;
 public class Parser {
 
     public String[] parsForComand(String line) {
-        String[] outMas;
         String[] parsMas = line.split(" ", 2);
 
         switch (parsMas[0]) {
+            // comand _ anyText
             case "echo":
-                outMas = line.split(" ", 2); // comand _ anyText                  
-                break;
+                return parsMas;               
 
+            // comand _ destination _ messegeText     
             case "msg":
-                outMas = line.split(" ", 3); // comand _ destination _ messegeText 
-                break;
+                return line.split(" ", 3); 
 
             default:
-                outMas = line.split(" ");
-                break;
+                return line.split(" ");
         }
-        return outMas;
     }
-
 }

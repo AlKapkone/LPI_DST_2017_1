@@ -1,57 +1,55 @@
 package seminar6;
 
+import java.util.List;
 import javax.jms.Session;
 
-
 public class Interpretator {
-    private final CommandProcessing comP;
-    private final Parser parser = new Parser(); 
-    
-    public Interpretator(Session session, Session sessionReceiveMess, Session sessionReceiveFile) {
-        comP = new CommandProcessing(session, sessionReceiveMess, sessionReceiveFile);        
+
+    private final CommandProcessing comandProcess;
+    private final Parser parser = new Parser();
+
+    public Interpretator(List<Session> sessions) {
+        comandProcess = new CommandProcessing(sessions);
     }
-    
-    public void interpretator(String inLine){
+
+    public void interpretator(String inLine) {
 
         String[] comandMas = parser.parsForComand(inLine);
+        String command = comandMas[0];
 
-        try {
-            switch (comandMas[0]) {
+        switch (command) {
 
-                case "ping":
-                    comP.ping();
-                    break;
+            case "ping":
+                comandProcess.ping();
+                break;
 
-                case "echo":
-                    comP.echo(comandMas);
-                    break;
+            case "echo":
+                comandProcess.echo(comandMas);
+                break;
 
-                case "login":
-                    comP.login(comandMas);
-                    break;
+            case "login":
+                comandProcess.login(comandMas);
+                break;
 
-                case "list":
-                    comP.list();
-                    break;
+            case "list":
+                comandProcess.list();
+                break;
 
-                case "msg":
-                    comP.msg(comandMas);
-                    break;
+            case "msg":
+                comandProcess.msg(comandMas);
+                break;
 
-                case "file":
-                    comP.file(comandMas);
-                    break;
+            case "file":
+                comandProcess.file(comandMas);
+                break;
 
-                case "exit":
-                    comP.exit();
-                    break;
+            case "exit":
+                comandProcess.exit();
+                break;
 
-                default:
-                    System.out.println("No this comand");
-                    break;
-            }
-        } catch (Exception ex) {
-            System.out.println("Interpretator problem");
+            default:
+                System.out.println("No this comand");
+                break;
         }
     }
 }

@@ -1,21 +1,15 @@
 package seminar6;
 
 import java.time.Instant;
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MapMessage;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
-import javax.jms.MessageProducer;
+import javax.jms.*;
 
 class MessageReceiver implements MessageListener {
 
-    private final javax.jms.Session sessionReceive;
+    private final Session sessionReceive;
     private MessageConsumer consumer = null;
     private MessageProducer producer = null;
 
-    MessageReceiver(javax.jms.Session sessionReceive) {
+    MessageReceiver(Session sessionReceive) {
         this.sessionReceive = sessionReceive;
     }
 
@@ -25,12 +19,12 @@ class MessageReceiver implements MessageListener {
             if (message instanceof MapMessage) {
                 int time = (int) (Instant.now().getEpochSecond() - CommandProcessing.timestamp.getEpochSecond());
 
-                MapMessage mapMsg = (MapMessage) message;
-                String sender = mapMsg.getString("sender");
+                MapMessage request = (MapMessage) message;
+                String sender = request.getString("sender");
                 if (time > 60*5) {
                     sendAfk(sender, time);
                 } else {
-                    String messag = mapMsg.getString("message");
+                    String messag = request.getString("message");
                     System.out.println("\nNew message\nFrom : " + sender + "\nText : " + messag + "\n");
                 }
             }
@@ -40,7 +34,7 @@ class MessageReceiver implements MessageListener {
     }
 
     public void receive(String brokerUri) throws JMSException {
-        javax.jms.MapMessage request = sessionReceive.createMapMessage();
+        MapMessage request = sessionReceive.createMapMessage();
 
         Destination queue = sessionReceive.createQueue(brokerUri);
 
@@ -54,16 +48,16 @@ class MessageReceiver implements MessageListener {
     }
 
     public void sendAfk(String sender, int time) throws JMSException {
-        javax.jms.MessageProducer producerReq = null;
+        MessageProducer producerReq = null;
 
         try {
-            javax.jms.MapMessage request = sessionReceive.createMapMessage();
+            MapMessage request = sessionReceive.createMapMessage();
 
             request.setString("receiver", sender);
             request.setString("message", "Destination client is afk, last action " + time/60 + " minuts ago");
                         
-            javax.jms.Destination targetQueue = sessionReceive.createQueue("chat.sendMessage");
-            javax.jms.Destination replyQueue = this.sessionReceive.createTemporaryQueue();
+            Destination targetQueue = sessionReceive.createQueue("chat.sendMessage");
+            Destination replyQueue = this.sessionReceive.createTemporaryQueue();
 
             producerReq = sessionReceive.createProducer(targetQueue);
 

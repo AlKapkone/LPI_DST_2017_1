@@ -1,15 +1,8 @@
 package seminar6;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.Serializable;
+import java.io.*;
+import javax.jms.*;
 import java.time.Instant;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.ObjectMessage;
-import javax.jms.Session;
 import lpi.server.mq.FileInfo;
 
 public class FileReceiver extends MessageReceiver {
@@ -37,7 +30,6 @@ public class FileReceiver extends MessageReceiver {
                     }
                 }
             } catch (JMSException ex) {
-                Logger.getLogger(FileReceiver.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

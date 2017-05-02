@@ -1,8 +1,7 @@
 package seminar4;
 
 import java.util.Scanner;
-import lpi.server.soap.ChatServer;
-import lpi.server.soap.IChatServer;
+import lpi.server.soap.*;
 
 public class Client {
 

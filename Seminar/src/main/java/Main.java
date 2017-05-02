@@ -1,22 +1,20 @@
+
 import java.util.Scanner;
 
 public class Main {
-	
-	public static boolean flug = true;
+    public static boolean flug = true;
 
-	public static void main(String[] args) {
-		
-		System.out.println("HELLo World!");
-		
-		Scanner scanner = new Scanner(System.in);	
-		Interpretator interP = new Interpretator();		
-		
-		while(flug){
-			System.out.println("\nEnter comand, (stop to exit) :\n");
-			if(scanner.hasNextLine()){				
-				interP.procces(scanner.nextLine());
-			}			
-		}
-		scanner.close();
-	}
+    public static void main(String[] args) {
+        System.out.println("HELLo World!");
+        Interpretator interpretator = new Interpretator();
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.println("\nEnter comand, (stop to exit) :\n");
+            while (flug) {
+                String inLine = scanner.nextLine().trim();
+                if (!inLine.equals("")) {
+                    interpretator.procces(inLine);
+                }
+            }
+        }
+    }
 }

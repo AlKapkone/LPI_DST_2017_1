@@ -1,10 +1,8 @@
 package seminar2;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.*;
+import java.nio.file.*;
+import java.util.Arrays;
 
 public class CommandProcessingToServer {
 
@@ -20,99 +18,95 @@ public class CommandProcessingToServer {
     private static final int MAX_CONTENT_SIZE = 10_500_000;
 
     public byte[] pingToServer(String comand) {
-        Interpretator.sendComand = comand;
         return PING_ID;
     }
 
     public byte[] ehoToServer(String[] comand) {
-        Interpretator.sendComand = comand[0];
         if (comand.length == 1) {
             return EHO_ID;
         } else {
-            byte[] respByte = new byte[1 + comand[1].getBytes().length];
-            respByte[0] = EHO_ID[0];
-
-            System.arraycopy(comand[1].getBytes(), 0, respByte, 1, comand[1].getBytes().length);
-            return respByte;
+            String echoText = comand[1];
+            return prepareDataToSend(echoText.getBytes(), EHO_ID);
         }
     }
 
-    private String[] user = null;
-    private byte[] serialize = null;
+    public byte[] loginToServer(String[] comand) {
 
-    public byte[] loginToServer(String[] comand) throws IOException {
-        Interpretator.sendComand = comand[0];
-
-        if (comand.length == 3) {
-            user = new String[2];
-            user[0] = comand[1];
-            user[1] = comand[2];
+        if (comand.length != 3) {
+            return null;
         }
-        serialize = Interpretator.serialize(user);
-        byte[] respByte = new byte[1 + serialize.length];
-        respByte[0] = LOGIN_ID[0];
+        String[] user = Arrays.copyOfRange(comand, 1, comand.length);
 
-        System.arraycopy(serialize, 0, respByte, 1, serialize.length);
-        return respByte;
+        byte[] serialized = serialize(user);
+        return prepareDataToSend(serialized, LOGIN_ID);
     }
 
     public byte[] listToServer(String[] comand) {
-        Interpretator.sendComand = comand[0];
         return LIST_ID;
     }
 
-    public byte[] msgToServer(String[] comand) throws IOException {
-        Interpretator.sendComand = comand[0];
-        if (comand.length == 3) {
-            user = new String[2];
-            user[0] = comand[1];
-            user[1] = comand[2];
-
-            serialize = Interpretator.serialize(user);
-            byte[] respByte = new byte[1 + serialize.length];
-            respByte[0] = MSG_ID[0];
-
-            System.arraycopy(serialize, 0, respByte, 1, serialize.length);
-            return respByte;
-        } else {
+    public byte[] msgToServer(String[] comand) {
+        if (comand.length != 3) {
             return null;
         }
+        String[] user = Arrays.copyOfRange(comand, 1, comand.length);
+
+        byte[] serialized = serialize(user);
+        return prepareDataToSend(serialized, MSG_ID);
     }
 
     public byte[] fileToServer(String[] comand) {
-        byte[] respByte = null;
-        if (comand.length == 3) {
-            Interpretator.sendComand = comand[0];
-            user = comand;
-            try {
-                if (!new File(user[2]).exists()) {
-                    System.out.println("No file");
-                    return null;
-                }
-                Path path = FileSystems.getDefault().getPath(user[2]);
-                byte[] file = Files.readAllBytes(path);
-                if (!(file.length > 0 && file.length < MAX_CONTENT_SIZE)) {
-                    System.out.println("Bad file size");
-                    return null;
-                }
-                serialize = Interpretator.serialize(new Object[]{user[1], user[2], file});
-                respByte = new byte[1 + serialize.length];
-                respByte[0] = FILE_ID[0];
-                System.arraycopy(serialize, 0, respByte, 1, serialize.length);
-            } catch (IOException ex) {
-                System.out.println("Problem wich opened file");
-            }
+        if (comand.length != 3) {
+            return null;
         }
+        String receiver = comand[1];
+        String fileName = comand[2];
+
+        if (!new File(fileName).exists()) {
+            System.out.println("No file");
+            return null;
+        }
+        Path path = FileSystems.getDefault().getPath(fileName);
+        byte[] file = {};
+        
+        try {
+            file = Files.readAllBytes(path);
+        } catch (IOException ex) {
+            System.out.println("Problem wich opened file");
+        }
+        
+        if (!(file.length > 0 && file.length < MAX_CONTENT_SIZE)) {
+            System.out.println("Bad file size");
+            return null;
+        }
+        byte[] serialized = serialize(new Object[]{receiver, fileName, file});
+        return prepareDataToSend(serialized, FILE_ID);
+    }
+
+    private byte[] prepareDataToSend(byte[] serialized, byte[] ObjID) {
+        byte[] respByte = new byte[1 + serialized.length];
+        respByte[0] = ObjID[0];
+        System.arraycopy(serialized, 0, respByte, 1, serialized.length);
         return respByte;
     }
 
     public byte[] receiveMsgToServer() {
-        Interpretator.sendComand = "receivemsg";
         return RECEIVE_MSG_ID;
     }
 
     public byte[] receiveFileToServer() {
-        Interpretator.sendComand = "receivefile";
         return RECEIVE_FILE_ID;
+    }
+
+    private byte[] serialize(Object object) {
+
+        try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                ObjectOutputStream objectStream = new ObjectOutputStream(byteStream)) {
+            objectStream.writeObject(object);
+            return byteStream.toByteArray();
+        } catch (IOException ex) {
+            System.out.println("Serialization problem");
+        }
+        return new byte[]{};
     }
 }

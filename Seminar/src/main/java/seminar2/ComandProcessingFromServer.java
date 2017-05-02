@@ -1,10 +1,6 @@
 package seminar2;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import static seminar2.Interpretator.deserialize;
+import java.io.*;
 
 public class ComandProcessingFromServer {
 
@@ -43,14 +39,18 @@ public class ComandProcessingFromServer {
     private boolean isLogin = false;
 
     public void loginFromServer(byte[] serverResp) {
-        if (serverResp[0] == LOGIN_ID_RESP_REG_OK) {
-            System.out.println("new user, registration ok;\n");
-            isLogin = true;
-        } else if (serverResp[0] == LOGIN_ID_RESP_LOGIN_OK) {
-            System.out.println("login ok;\n");
-            isLogin = true;
-        } else {
-            getError(serverResp[0]);
+        switch (serverResp[0]) {
+            case LOGIN_ID_RESP_REG_OK:
+                System.out.println("new user, registration ok;\n");
+                isLogin = true;
+                break;
+            case LOGIN_ID_RESP_LOGIN_OK:
+                System.out.println("login ok;\n");
+                isLogin = true;
+                break;
+            default:
+                getError(serverResp[0]);
+                break;
         }
     }
 
@@ -95,15 +95,19 @@ public class ComandProcessingFromServer {
     public void receiveFile(byte[] serverResp) throws ClassNotFoundException, IOException {
         if (serverResp.length != 1) {
             Object[] resFile = deserialize(serverResp, 0, Object[].class);
-            if (resFile.length != 3 || resFile[0] == null || resFile[1] == null || resFile[2] == null
-                    || !resFile[0].getClass().equals(String.class) || !resFile[1].getClass().equals(String.class)
+            if (resFile.length != 3
+                    || resFile[0] == null || resFile[1] == null || resFile[2] == null
+                    || !resFile[0].getClass().equals(String.class) 
+                    || !resFile[1].getClass().equals(String.class)
                     || !resFile[2].getClass().equals(byte[].class)) {
                 System.out.println("Bad file parameters from server");
             }
-            System.out.println("File from user:  " + (String) resFile[0] + "\nfile name : " + (String) resFile[1]);
+            String sender = (String) resFile[0];
+            String fileName = (String) resFile[1];
+            System.out.println("File from user:  " + sender + "\nfile name : " + fileName);
 
             try (FileOutputStream fos = new FileOutputStream(
-                    new File((String) resFile[0] + "_" + (String) resFile[1]))) {
+                    new File(sender + "_" + fileName))) {
                 fos.write((byte[]) resFile[2]);
             } catch (Exception ex) {
                 System.out.println("Problem with write file");
@@ -142,9 +146,15 @@ public class ComandProcessingFromServer {
                 System.out.println("SENDING FAILED");
                 break;
             default:
-                System.out.println("Unknow comand from server");
                 System.out.println(error);
                 break;
+        }
+    }
+
+    public static <T> T deserialize(byte[] data, int offset, Class<T> clazz) throws ClassNotFoundException, IOException {
+        try (ByteArrayInputStream stream = new ByteArrayInputStream(data, offset, data.length - offset);
+                ObjectInputStream objectStream = new ObjectInputStream(stream)) {
+            return (T) objectStream.readObject();
         }
     }
 }

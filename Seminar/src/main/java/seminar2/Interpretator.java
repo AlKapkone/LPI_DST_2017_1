@@ -1,129 +1,105 @@
 package seminar2;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 public class Interpretator {
 
-    public static String sendComand = null;
+    private String comand = null;
 
-    CommandProcessingToServer comTo = new CommandProcessingToServer();
+    public void setComand(String comand) {
+        this.comand = comand;
+    }
 
-    public byte[] interpretator(String inLine) throws IOException {
+    public String getComand() {
+        return comand;
+    }
 
-        String[] comandMas = parsForComand(inLine);
+    private final CommandProcessingToServer comToServer;
+    private final ComandProcessingFromServer comFromServer;
+    private final Parser parser;
 
-        switch (comandMas[0]) {
+    public Interpretator() {
+        this.comToServer = new CommandProcessingToServer();
+        this.comFromServer = new ComandProcessingFromServer();
+        this.parser = new Parser();
+    }
+
+    public byte[] prepareToSend(String inLine){
+
+        String[] comandMas = parser.parsForComand(inLine);
+        setComand(comandMas[0]);
+        
+        switch (getComand()) {
             case "ping":
-                return comTo.pingToServer(comandMas[0]);
+                return comToServer.pingToServer(comandMas[0]);
 
             case "eho":
-                return comTo.ehoToServer(comandMas);
+                return comToServer.ehoToServer(comandMas);
 
             case "login":
-                return comTo.loginToServer(comandMas);
+                return comToServer.loginToServer(comandMas);
 
             case "list":
-                return comTo.listToServer(comandMas);
+                return comToServer.listToServer(comandMas);
 
             case "msg":
-                return comTo.msgToServer(comandMas);
+                return comToServer.msgToServer(comandMas);
 
             case "file":
-                return comTo.fileToServer(comandMas);
+                return comToServer.fileToServer(comandMas);
 
             case "receivemsg":
-                return comTo.receiveMsgToServer();
+                return comToServer.receiveMsgToServer();
 
             case "receivefile":
-                return comTo.receiveFileToServer();
+                return comToServer.receiveFileToServer();
 
             default:
                 System.out.println("No this comand");
                 return null;
         }
     }
-    
-    ComandProcessingFromServer comFrom = new ComandProcessingFromServer();
 
-    public void interpretator(byte[] serverResp) {
+    public void executeRespons(byte[] serverResp) {
         if (serverResp != null) {
             try {
-                switch (sendComand) {
+                switch (getComand()) {
                     case "ping":
-                        comFrom.pingFromServer(serverResp);
+                        comFromServer.pingFromServer(serverResp);
                         break;
 
                     case "eho":
-                        comFrom.ehoFromServer(serverResp);
+                        comFromServer.ehoFromServer(serverResp);
                         break;
 
                     case "login":
-                        comFrom.loginFromServer(serverResp);
+                        comFromServer.loginFromServer(serverResp);
                         break;
 
                     case "list":
-                        comFrom.listFromServer(serverResp);
+                        comFromServer.listFromServer(serverResp);
                         break;
 
                     case "msg":
-                        comFrom.msgFromServer(serverResp);
+                        comFromServer.msgFromServer(serverResp);
                         break;
 
                     case "file":
-                        comFrom.fileFromServer(serverResp);
+                        comFromServer.fileFromServer(serverResp);
                         break;
 
                     case "receivemsg":
-                        comFrom.receiveMsg(serverResp);
+                        comFromServer.receiveMsg(serverResp);
                         break;
 
                     case "receivefile":
-                        comFrom.receiveFile(serverResp);
+                        comFromServer.receiveFile(serverResp);
                         break;
                 }
-            } catch (Exception ex) {
+            } catch (ClassNotFoundException | IOException ex) {
                 ex.printStackTrace();
                 System.out.println("problem with interpretation responds");
             }
         }
-    }
-
-    public static byte[] serialize(Object object) throws IOException {
-        try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                ObjectOutputStream objectStream = new ObjectOutputStream(byteStream)) {
-            objectStream.writeObject(object);
-            return byteStream.toByteArray();
-        }
-    }
-
-    public static <T> T deserialize(byte[] data, int offset, Class<T> clazz) throws ClassNotFoundException, IOException {
-        try (ByteArrayInputStream stream = new ByteArrayInputStream(data, offset, data.length - offset);
-                ObjectInputStream objectStream = new ObjectInputStream(stream)) {
-            return (T) objectStream.readObject();
-        }
-    }
-
-    private String[] parsForComand(String line) {
-        String[] outMas = null;
-        String[] parsMas = line.split(" ", 2);
-
-        switch (parsMas[0]) {
-            case "eho":
-                outMas = line.split(" ", 2); // comand _ anyText                  
-                break;
-
-            case "msg":
-                outMas = line.split(" ", 3); // comand _ destination _ messegeText 
-                break;
-
-            default:
-                outMas = line.split(" ");
-                break;
-        }
-        return outMas;
-    }
+    }       
 }

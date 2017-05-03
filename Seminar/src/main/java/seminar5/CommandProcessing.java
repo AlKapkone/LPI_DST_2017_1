@@ -154,12 +154,13 @@ public class CommandProcessing {
         }
     }
 
-    private boolean isValidNumberOfParameter(int ComandMasLength, int validLength) {
-        if (ComandMasLength != validLength) {
-            System.out.println("Bad argument");
-            return false;
-        }
-        return true;
+    private boolean isValidNumberOfParameter(int ComandMasLength, int validLength) {        
+        return (ComandMasLength != validLength) ? true : badParameterLength();
+    }
+    
+    private boolean badParameterLength(){
+        System.out.println("Bad argument");
+        return false;
     }
 
     public void receiveMsg() {

@@ -236,7 +236,7 @@ public class CommandProcessing {
 
         try {
             Destination targetQueue = session.createQueue(broker_URI);
-            Destination replyQueue = this.session.createTemporaryQueue();
+            Destination replyQueue = session.createTemporaryQueue();
 
             producer = session.createProducer(targetQueue);
             consumer = session.createConsumer(replyQueue);

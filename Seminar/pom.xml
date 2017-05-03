@@ -18,6 +18,18 @@
             <version>5.13.3</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>LPI_DST</groupId>
+            <artifactId>Seminar6</artifactId>
+            <version>1.0</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>LPI_DST</groupId>
+            <artifactId>Seminar5</artifactId>
+            <version>1.0</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     
 </project>

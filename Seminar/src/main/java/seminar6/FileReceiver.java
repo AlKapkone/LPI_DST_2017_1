@@ -42,8 +42,9 @@ public class FileReceiver extends MessageReceiver {
         System.out.println("\nNew file\nFrom: " + fi.getSender()
                 + "\nFile name : \"" + fi.getFilename() + "\"\n");
 
-        try (FileOutputStream fos = new FileOutputStream(
-                new File(fi.getSender() + "_" + fi.getFilename()))) {
+        File file = new File(fi.getSender() + "_" + fi.getFilename());
+        
+        try (FileOutputStream fos = new FileOutputStream(file)) {
             fos.write(fi.getFileContent());
         } catch (Exception ex) {
             System.out.println("Problem with write file");

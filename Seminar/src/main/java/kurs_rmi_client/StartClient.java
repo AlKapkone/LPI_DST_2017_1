@@ -11,7 +11,7 @@ public class StartClient {
     private final Registry registry;
     private final Compute remoteCompute;
     
-    StartClient() throws Exception{
+    public StartClient() throws Exception{
         getSecurityManager();
         registry = LocateRegistry.getRegistry(Compute.PORT);
         remoteCompute = (Compute) registry.lookup(Compute.SERVER_NAME);
@@ -47,5 +47,4 @@ public class StartClient {
                 interpretator.interpretator(scanner.nextLine());            
         }
     }
-
 }

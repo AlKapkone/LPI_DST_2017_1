@@ -1,17 +1,12 @@
 package rmi_server;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
+import java.util.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.time.Instant;
-import java.util.Date;
-import java.util.Locale;
 
 public interface Compute extends Remote {
 
@@ -45,7 +40,7 @@ public interface Compute extends Remote {
 
         public FileInfo(File file) throws IOException {
             fileContent = Files.readAllBytes(file.toPath());
-            this.filename = file.getName();
+            filename = file.getName();
         }
 
         public byte[] getFileContent() {
@@ -134,6 +129,5 @@ public interface Compute extends Remote {
                 System.out.println("Problem with write file");
             }
         }
-
     }
 }

@@ -1,11 +1,8 @@
 package rmi_server;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
+import java.io.*;
+import java.rmi.*;
+import java.rmi.registry.*;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Date;
 
@@ -21,20 +18,20 @@ public class Server implements Compute, Closeable {
     }
 
     private void closeRegistry() throws IOException{
-        if (this.registry != null) {
+        if (registry != null) {
             try {
-                this.registry.unbind(SERVER_NAME);
+                registry.unbind(SERVER_NAME);
             } catch (NotBoundException e) {
                 e.printStackTrace();
             }
-            this.registry = null;
+            registry = null;
         }
     }
 
     private void closeStub() throws IOException{
-        if (this.stub != null) {
+        if (stub != null) {
             UnicastRemoteObject.unexportObject(this, true);
-            this.stub = null;
+            stub = null;
         }
     }
 
@@ -42,7 +39,6 @@ public class Server implements Compute, Closeable {
 
     public void startServer(int port){
         this.port = port;
-
         getSecurityManager();
         start();
     }
@@ -58,7 +54,6 @@ public class Server implements Compute, Closeable {
             setRegistry();
         } catch (Exception ex) {
             System.err.println("ComputeEngine exception: ");
-            ex.printStackTrace();
         }
     }
 

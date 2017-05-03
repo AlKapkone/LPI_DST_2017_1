@@ -23,7 +23,7 @@ public class FileReceiver extends MessageReceiver {
                 FileInfo fi = (FileInfo) fileInfoSerializable;
 
                 if (fi instanceof FileInfo) {
-                    if (time > 30) {
+                    if (time > 60*5) {
                         sendAfk(fi.getSender(), time);
                     } else {
                         writeFile(fi);

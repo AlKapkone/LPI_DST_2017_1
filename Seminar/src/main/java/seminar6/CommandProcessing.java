@@ -39,7 +39,6 @@ public class CommandProcessing {
     public static Instant timestamp;
 
     public void ping() {
-
         try {
             Message msg = session.createMessage();
             Message ms = contactServer(msg, PING_QUEUE);
@@ -53,20 +52,20 @@ public class CommandProcessing {
     }
 
     public void echo(String[] comandMas) {
+        if (!isValidNumberOfParameter(comandMas.length, ECHO_VALID_PARAMETERS_LENGTH)) {
+            return;
+        }
+        try {
+            String echoText = comandMas[1];
 
-        if (isValidNumberOfParameter(comandMas.length, ECHO_VALID_PARAMETERS_LENGTH)) {
-            try {
-                String echoText = comandMas[1];
+            TextMessage msg = session.createTextMessage(echoText);
+            Message ms = contactServer(msg, ECHO_QUEUE);
 
-                TextMessage msg = session.createTextMessage(echoText);
-                Message ms = contactServer(msg, ECHO_QUEUE);
+            responsAnalize(ms instanceof TextMessage, ((TextMessage) ms).getText(),
+                    "Unexpected message type: " + msg.getClass());
 
-                responsAnalize(ms instanceof TextMessage, ((TextMessage) ms).getText(),
-                        "Unexpected message type: " + msg.getClass());
-
-            } catch (JMSException ex) {
-                System.out.println("connections problem");
-            }
+        } catch (JMSException ex) {
+            System.out.println("connections problem");
         }
     }
 
@@ -115,8 +114,8 @@ public class CommandProcessing {
                 if (obj != null && obj instanceof String[]) {
                     String[] users = (String[]) obj;
                     System.out.println("\nOnline users :");
-                    for (String us : users) {
-                        System.out.println(us);
+                    for (String user : users) {
+                        System.out.println(user);
                     }
                 } else {
                     throw new IOException("Unexpected content: " + obj);
@@ -128,55 +127,53 @@ public class CommandProcessing {
     }
 
     public void msg(String[] comandMas) {
-        if (isLogged()) {
+        if (!isLogged()) {
+            return;
+        }
+        if (isValidNumberOfParameter(comandMas.length, MESSAGE_VALID_PARAMETERS_LENGTH)) {
+            return;
+        }
+        String receiver = comandMas[1];
+        String message = comandMas[2];
+        try {
+            MapMessage request = session.createMapMessage();
+            request.setString("receiver", receiver);
+            request.setString("message", message);
+            MapMessage response = (MapMessage) contactServer(request, SEND_MESSAGE_QUEUE);
 
-            if (isValidNumberOfParameter(comandMas.length, MESSAGE_VALID_PARAMETERS_LENGTH)) {
-                String receiver = comandMas[1];
-                String message = comandMas[2];
+            responsAnalize(response.getBoolean("success"), "Message send",
+                    "Failed sending message: " + response.getString("message"));
 
-                try {
-                    MapMessage request = session.createMapMessage();
-                    request.setString("receiver", receiver);
-                    request.setString("message", message);
-                    MapMessage response = (MapMessage) contactServer(request, SEND_MESSAGE_QUEUE);
-
-                    responsAnalize(response.getBoolean("success"), "Message send",
-                            "Failed sending message: " + response.getString("message"));
-
-                } catch (JMSException ex) {
-                    ex.printStackTrace();
-                    System.out.println("connections problem");
-                }
-            }
+        } catch (JMSException ex) {
+            ex.printStackTrace();
+            System.out.println("connections problem");
         }
     }
 
     public void file(String[] comandMas) {
-        if (isLogged()) {
-            if (isValidNumberOfParameter(comandMas.length, FILE_VALID_PARAMETERS_LENGTH)) {
-                String receiver = comandMas[1];
-                String fileName = comandMas[2];
+        if (!isLogged()) {
+            return;
+        }
+        if (isValidNumberOfParameter(comandMas.length, FILE_VALID_PARAMETERS_LENGTH)) {
+            return;
+        }
+        String receiver = comandMas[1];
+        String fileName = comandMas[2];
+        File file = new File(fileName);
+        if (!file.exists()) {
+            System.out.println("No this file");
+            return;
+        }
+        try {
+            ObjectMessage request = session.createObjectMessage(new FileInfo(myLogin, receiver,
+                    fileName, Files.readAllBytes(file.toPath())));
 
-                File file = new File(fileName);
+            MapMessage response = (MapMessage) contactServer(request, SEND_FILE_QUEUE);
 
-                if (!file.exists()) {
-                    System.out.println("No this file");
-                    return;
-                }
-
-                try {
-                    ObjectMessage request = session.createObjectMessage(new FileInfo(myLogin, receiver,
-                            fileName, Files.readAllBytes(file.toPath())));
-
-                    MapMessage response = (MapMessage) contactServer(request, SEND_FILE_QUEUE);
-
-                    responsAnalize(response.getBoolean("success"), "File send",
-                            "Failed sending file: " + response.getString("message"));
-
-                } catch (JMSException | IOException ex) {
-                    System.out.println("file sending problem");
-                }
-            }
+            responsAnalize(response.getBoolean("success"), "File send",
+                    "Failed sending file: " + response.getString("message"));
+        } catch (JMSException | IOException ex) {
+            System.out.println("file sending problem");
         }
     }
 
@@ -256,16 +253,14 @@ public class CommandProcessing {
         return mess;
     }
 
-    private void close_Prod_Cons(MessageProducer producer,
-            MessageConsumer consumer) {
-
-        if (producer == null && consumer == null) {
-            return;
-        }
-
+    private void close_Prod_Cons(MessageProducer producer, MessageConsumer consumer) {
         try {
-            producer.close();
-            consumer.close();
+            if (producer != null) {
+                producer.close();
+            }
+            if (consumer != null) {
+                consumer.close();
+            }
         } catch (Exception ex) {
             System.out.println("Closing producer/consumer problem");
         }

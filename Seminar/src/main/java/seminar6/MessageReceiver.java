@@ -47,7 +47,7 @@ class MessageReceiver implements MessageListener {
         producer.send(request);
     }
 
-    public void sendAfk(String sender, int time) throws JMSException {
+    protected void sendAfk(String sender, int time) throws JMSException {
         MessageProducer producerReq = null;
 
         try {
